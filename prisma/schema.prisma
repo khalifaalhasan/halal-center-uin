@@ -1,0 +1,101 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+  
+}
+
+datasource db {
+  provider  = "postgresql"
+  // Kembalikan dua baris ini:
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL") // Opsional: hanya jika pakai Supabase
+}
+
+
+// ADMIN & AUTH
+
+model User {
+  id String @id @default(cuid())
+  name String
+  email String @unique
+  password String
+  image String?
+  role String @default("admin")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  posts Post[]
+
+  @@map("users")
+}
+
+// CMS
+
+model Post {
+  id String @id @default(cuid())
+  title String
+  slug String @unique
+  excerpt String? @db.Text 
+  content String @db.Text
+  image String?
+  published Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+
+  //relasi author
+  authorId String
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  categoryId String?
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@index([slug])
+  @@map("posts")
+}
+
+model Category {
+  id String @id @default(cuid())
+  name String @unique
+  slug String @unique
+  posts Post[]
+
+  @@map("categories")
+}
+
+// COMPANY PROFILE DATA
+
+model Gallery {
+  id String @id @default(cuid())
+  title String?
+  imageUrl String
+  altText String
+  description String?
+  createdAt DateTime @default(now())
+
+  @@map("galleries")
+}
+
+model Service {
+  id String @id @default(cuid())
+  title String 
+  description String @db.Text
+  icon String?
+  order Int @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("services")
+}
+
+model Document {
+  id String @id @default(cuid())
+  title String 
+  fileUrl String
+  fileType String?
+  fileSize String?
+  createdAt DateTime @default(now())
+
+  @@map("documents")
+}
