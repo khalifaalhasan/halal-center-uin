@@ -9,7 +9,7 @@ datasource db {
   provider  = "postgresql"
   // Kembalikan dua baris ini:
   url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL") // Opsional: hanya jika pakai Supabase
+  // directUrl = env("DIRECT_URL") 
 }
 
 
