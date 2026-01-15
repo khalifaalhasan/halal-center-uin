@@ -1,0 +1,34 @@
+{
+  "brand": {
+    "name": "Lembaga Pemeriksa Halal",
+    "secondary": "UIN Raden fatah Palembang",
+    "shortName": "LPH UIN Raden Fatah",
+    "tagline": "Amanah, Profesional, dan Berintegritas",
+    "description": "Lembaga resmi pemeriksa kehalalan produk untuk mendukung ekosistem sertifikasi halal di Indonesia, khususnya di wilayah Sumatera Selatan.",
+    "email": "lph.uin@radenfatah.ac.id",
+    "phone": "6282175951986",
+    "address": "Jl. Prof. KH. Zainal Abidin Fikri No.1, KM. 3,5, Palembang, Sumatera Selatan",
+    "whatsapp": "6282175951986"
+  },
+  "socials": {
+    "instagram": {
+      "url": "https://www.instagram.com/lph.uinradenfatah",
+      "username": "@lph.uinradenfatah"
+    },
+    "facebook": {
+      "url": "https://www.facebook.com/lph.uinradenfatah",
+      "username": "LPH UIN Raden Fatah"
+    },
+    "whatsapp": {
+      "url": "https://wa.me/6282175951986",
+      "label": "Layanan Konsultasi Halal"
+    },
+    "tiktok": {
+      "url": "https://www.tiktok.com/@lph.uinradenfatah",
+      "username": "@lph.uinradenfatah"
+    }
+  },
+  "meta": {
+    "defaultMessage": "Assalamu'alaikum Admin LPH UIN Raden Fatah, saya ingin menanyakan prosedur pengajuan pemeriksaan halal..."
+  }
+}
