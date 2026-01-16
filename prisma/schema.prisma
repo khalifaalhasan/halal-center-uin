@@ -55,6 +55,8 @@ model Post {
   @@map("posts")
 }
 
+
+
 model Category {
   id String @id @default(cuid())
   name String @unique
