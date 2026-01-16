@@ -1,71 +1,81 @@
-// prisma/seed.ts
-import { PrismaClient } from '@prisma/client'
-import * as bcrypt from 'bcryptjs'
+import { PrismaClient } from "@prisma/client";
+import { fakerID_ID as faker } from "@faker-js/faker"; // Pakai locale Indonesia biar teksnya bahasa Indo
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Start seeding...')
+  console.log("🌱 Start seeding...");
 
-  // 1. Buat User Admin
-  const passwordHash = await bcrypt.hash('admin123', 10)
-  const admin = await prisma.user.upsert({
-    where: { email: 'khlfaallhsn5@gmail.com' },
+  // 1. AMBIL USER YANG SUDAH ADA
+  // Kita ambil user pertama yg ditemukan di DB sebagai author
+  const user = await prisma.user.findFirst();
+
+  if (!user) {
+    throw new Error(
+      "❌ Error: Tidak ada User di database. Buat user manual dulu atau adjust script ini."
+    );
+  }
+
+  console.log(`👤 Using author: ${user.name} (${user.id})`);
+
+  // 2. BUAT KATEGORI DUMMY (Opsional, biar post ada kategorinya)
+  // Menggunakan upsert agar tidak error kalau dijalankan berulang
+  const categoryTeknologi = await prisma.category.upsert({
+    where: { slug: "teknologi" },
     update: {},
     create: {
-      email: 'khlfaalhsn5@gmail.com',
-      name: 'Super Admin',
-      password: passwordHash,
-      role: 'admin',
+      name: "Teknologi",
+      slug: "teknologi",
     },
-  })
-  console.log(`👤 Admin created: ${admin.email}`)
+  });
 
-  // 2. Buat Kategori
-  const categories = [
-    { name: 'Berita & Artikel', slug: 'berita' },
-    { name: 'Kegiatan', slug: 'kegiatan' },
-    { name: 'Regulasi', slug: 'regulasi' },
-  ]
+  const categoryLifestyle = await prisma.category.upsert({
+    where: { slug: "lifestyle" },
+    update: {},
+    create: {
+      name: "Lifestyle",
+      slug: "lifestyle",
+    },
+  });
 
-  for (const cat of categories) {
-    await prisma.category.upsert({
-      where: { slug: cat.slug },
-      update: {},
-      create: cat,
-    })
-  }
-  console.log('fyp📂 Categories created')
+  const categories = [categoryTeknologi, categoryLifestyle];
 
-  // 3. Buat Dummy Post
-  const catBerita = await prisma.category.findUnique({ where: { slug: 'berita' } })
-  
-  if (catBerita) {
-    await prisma.post.upsert({
-      where: { slug: 'halal-center-uin-resmi-dibuka' },
-      update: {},
-      create: {
-        title: 'Halal Center UIN Resmi Dibuka untuk Umum',
-        slug: 'halal-center-uin-resmi-dibuka',
-        excerpt: 'Pusat kajian halal ini diharapkan menjadi rujukan utama sertifikasi halal di Sumatera Selatan.',
-        content: '<p>Lorem ipsum dolor sit amet...</p>', // Anggap ini HTML dari Rich Text Editor
-        published: true,
-        authorId: admin.id,
-        categoryId: catBerita.id,
+  // 3. GENERATE POSTS
+  console.log("📝 Generating posts...");
+
+  // Kita buat 10 postingan
+  for (let i = 0; i < 10; i++) {
+    const title = faker.lorem.sentence({ min: 4, max: 8 });
+    // Bikin slug dari title (lowercase + replace spasi)
+    const slug =
+      faker.helpers.slugify(title).toLowerCase() +
+      "-" +
+      faker.string.alphanumeric(4);
+
+    await prisma.post.create({
+      data: {
+        title: title,
+        slug: slug,
+        excerpt: faker.lorem.sentences(2),
+        content: faker.lorem.paragraphs(5), // Artikel panjang (5 paragraf)
+        image: faker.image.urlLoremFlickr({ category: "business" }), // Gambar random
+        published: faker.datatype.boolean(), // Random true/false
+        authorId: user.id, // Link ke user yg sudah ada
+        categoryId:
+          categories[Math.floor(Math.random() * categories.length)].id, // Random category
+        createdAt: faker.date.past(), // Tanggal acak di masa lampau
       },
-    })
-    console.log('📝 Dummy post created')
+    });
   }
 
-  console.log('✅ Seeding finished.')
+  console.log("✅ Seeding finished.");
 }
 
 main()
-  .then(async () => {
-    await prisma.$disconnect()
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
   })
-  .catch(async (e) => {
-    console.error(e)
-    await prisma.$disconnect()
-    process.exit(1)
-  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
