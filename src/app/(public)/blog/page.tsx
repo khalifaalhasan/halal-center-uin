@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { PostGrid } from "@/components/blog/blog-grid";
 import { PostListSkeleton } from "@/components/blog/blog-list-skeleton";
 
+export const dynamic = "force-dynamic";
 // Definisi tipe props halaman
 interface BlogPageProps {
   searchParams: Promise<{
