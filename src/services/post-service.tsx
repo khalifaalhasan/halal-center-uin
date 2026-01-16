@@ -107,14 +107,17 @@ export const deletePost = async (id: string) => {
 // --- FETCH UNTUK SIDEBAR ---
 export const getRecentPosts = async () => {
   return await prisma.post.findMany({
-    take: 5, // Ambil 5 post terbaru
+    take: 3, // Kita ambil 3 saja untuk ditampilkan di Home
     orderBy: { createdAt: "desc" },
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      createdAt: true,
-      image: true,
+    // Kita hapus 'select' spesifik agar mengambil field default,
+    // atau kita definisikan include yang lengkap:
+    include: {
+      author: {
+        select: { name: true, image: true },
+      },
+      category: {
+        select: { name: true, slug: true },
+      },
     },
   });
 };
