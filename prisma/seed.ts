@@ -1,74 +1,66 @@
 import { PrismaClient } from "@prisma/client";
-import { fakerID_ID as faker } from "@faker-js/faker"; // Pakai locale Indonesia biar teksnya bahasa Indo
+// Hapus import faker
+// Hapus import bcrypt sementara jika bikin error, atau gunakan try-catch
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 Start seeding...");
+  console.log("🌱 Start seeding manual...");
 
-  // 1. AMBIL USER YANG SUDAH ADA
-  // Kita ambil user pertama yg ditemukan di DB sebagai author
-  const user = await prisma.user.findFirst();
+  // 1. Buat User Admin
+  // Kita hardcode password hash (ini hash dari 'password123')
+  // Biar ga butuh library bcrypt saat seeding
+  const passwordHash = "$2b$10$EpRnTzVlqHNP0.fKbXWrHu.nceb2e2b9a.Cp/Hk.0/dW/X9.J.W"; 
 
-  if (!user) {
-    throw new Error(
-      "❌ Error: Tidak ada User di database. Buat user manual dulu atau adjust script ini."
-    );
+  const user = await prisma.user.upsert({
+    where: { email: "admin@uin.ac.id" },
+    update: {},
+    create: {
+      name: "Admin Halal Center",
+      email: "admin@uin.ac.id",
+      password: passwordHash, 
+      image: "https://ui-avatars.com/api/?name=Admin+Halal",
+      role: "ADMIN" // Hapus baris ini kalau di schema ga ada role
+    },
+  });
+
+  console.log(`👤 User ready: ${user.email}`);
+
+  // 2. Buat Kategori Manual
+  const categoriesData = [
+    { name: "Teknologi", slug: "teknologi" },
+    { name: "Berita", slug: "berita" },
+    { name: "Edukasi", slug: "edukasi" }
+  ];
+
+  const dbCategories = [];
+  for (const c of categoriesData) {
+    const cat = await prisma.category.upsert({
+      where: { slug: c.slug },
+      update: {},
+      create: c,
+    });
+    dbCategories.push(cat);
   }
 
-  console.log(`👤 Using author: ${user.name} (${user.id})`);
-
-  // 2. BUAT KATEGORI DUMMY (Opsional, biar post ada kategorinya)
-  // Menggunakan upsert agar tidak error kalau dijalankan berulang
-  const categoryTeknologi = await prisma.category.upsert({
-    where: { slug: "teknologi" },
-    update: {},
-    create: {
-      name: "Teknologi",
-      slug: "teknologi",
-    },
-  });
-
-  const categoryLifestyle = await prisma.category.upsert({
-    where: { slug: "lifestyle" },
-    update: {},
-    create: {
-      name: "Lifestyle",
-      slug: "lifestyle",
-    },
-  });
-
-  const categories = [categoryTeknologi, categoryLifestyle];
-
-  // 3. GENERATE POSTS
-  console.log("📝 Generating posts...");
-
-  // Kita buat 10 postingan
-  for (let i = 0; i < 10; i++) {
-    const title = faker.lorem.sentence({ min: 4, max: 8 });
-    // Bikin slug dari title (lowercase + replace spasi)
-    const slug =
-      faker.helpers.slugify(title).toLowerCase() +
-      "-" +
-      faker.string.alphanumeric(4);
-
+  // 3. Buat Post Manual (Looping sederhana)
+  console.log("📝 Creating posts...");
+  for (let i = 1; i <= 3; i++) {
     await prisma.post.create({
       data: {
-        title: title,
-        slug: slug,
-        excerpt: faker.lorem.sentences(2),
-        content: faker.lorem.paragraphs(5), // Artikel panjang (5 paragraf)
-        image: faker.image.urlLoremFlickr({ category: "business" }), // Gambar random
-        published: faker.datatype.boolean(), // Random true/false
-        authorId: user.id, // Link ke user yg sudah ada
-        categoryId:
-          categories[Math.floor(Math.random() * categories.length)].id, // Random category
-        createdAt: faker.date.past(), // Tanggal acak di masa lampau
+        title: `Contoh Berita Halal ${i}`,
+        slug: `contoh-berita-halal-${i}-${Date.now()}`,
+        excerpt: "Ringkasan berita untuk testing tampilan website.",
+        content: "Isi konten berita yang cukup panjang untuk demo. Halal center UIN berkomitmen memajukan industri halal di Indonesia.",
+        image: "https://placehold.co/600x400/png",
+        published: true,
+        authorId: user.id,
+        categoryId: dbCategories[0].id, // Masukkan ke kategori pertama
       },
     });
   }
 
-  console.log("✅ Seeding finished.");
+  console.log("✅ Seeding selesai!");
 }
 
 main()
