@@ -28,7 +28,6 @@ export function PostCard({
       className="group flex flex-row md:flex-col bg-white border border-slate-100 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 h-full"
     >
       {/* --- IMAGE SECTION --- */}
-      {/* Mobile: Width fixed (w-32 atau w-1/3). Desktop: w-full h-48 */}
       <div className="relative w-32 min-w-[120px] md:w-full md:h-48 bg-slate-100 shrink-0">
         {image ? (
           <Image
@@ -36,6 +35,8 @@ export function PostCard({
             alt={title}
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-105"
+            // 👇 TAMBAHKAN INI (Solusi Masalah Docker/Localhost)
+            unoptimized={true}
           />
         ) : (
           <div className="flex items-center justify-center w-full h-full text-slate-300">
@@ -54,7 +55,7 @@ export function PostCard({
       {/* --- CONTENT SECTION --- */}
       <div className="flex flex-col flex-1 p-3 md:p-6 justify-between">
         <div>
-          {/* Mobile Category (Text Kecil di atas judul) */}
+          {/* Mobile Category */}
           {categoryName && (
             <span className="md:hidden block text-[10px] font-bold text-indigo-600 mb-1 uppercase tracking-wide">
               {categoryName}
@@ -66,7 +67,7 @@ export function PostCard({
             {title}
           </h3>
 
-          {/* Excerpt (Desktop Only - Mobile sempit gausah pake excerpt) */}
+          {/* Excerpt */}
           <p className="hidden md:block text-slate-500 text-sm line-clamp-3 mb-4">
             {excerpt || "Tidak ada ringkasan."}
           </p>
@@ -78,7 +79,6 @@ export function PostCard({
             <Calendar size={12} className="md:w-3.5 md:h-3.5" />
             <span>{formatDate(createdAt)}</span>
           </div>
-          {/* Author hidden di mobile biar ga sempit */}
           <div className="hidden md:flex items-center gap-1">
             <User size={12} className="md:w-3.5 md:h-3.5" />
             <span>{authorName}</span>

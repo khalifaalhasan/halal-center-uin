@@ -13,21 +13,20 @@ export async function BlogSidebar() {
 
   return (
     <aside className="space-y-8">
-      {/* 1. SEARCH WIDGET (Sekarang Aktif) */}
+      {/* 1. SEARCH WIDGET */}
       <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm">
         <h3 className="font-bold text-slate-800 mb-4">Cari Artikel</h3>
-        {/* Panggil Client Component di sini */}
         <SearchForm />
       </div>
 
-      {/* ... (Bagian Kategori dan Recent Posts tidak berubah) ... */}
+      {/* 2. KATEGORI */}
       <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm">
         <h3 className="font-bold text-slate-800 mb-4">Kategori</h3>
         <ul className="space-y-2">
           {categories.map((cat) => (
             <li key={cat.id}>
               <Link
-                href={`/blog?category=${cat.slug}`} // Tips: Bisa pakai filter query juga
+                href={`/blog?category=${cat.slug}`}
                 className="flex items-center justify-between text-sm text-slate-600 hover:text-indigo-600 group"
               >
                 <span>{cat.name}</span>
@@ -40,7 +39,7 @@ export async function BlogSidebar() {
         </ul>
       </div>
 
-      {/* 3. RECENT POSTS */}
+      {/* 3. RECENT POSTS (Updated Image Fix) */}
       <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm">
         <h3 className="font-bold text-slate-800 mb-4">Artikel Terbaru</h3>
         <div className="space-y-4">
@@ -51,13 +50,20 @@ export async function BlogSidebar() {
               className="flex gap-3 group"
             >
               <div className="relative w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-slate-100">
-                {post.image && (
+                {post.image ? (
                   <Image
                     src={post.image}
                     alt={post.title}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    // 👇 TAMBAHKAN INI LAGI
+                    unoptimized={true}
                   />
+                ) : (
+                  // Fallback jika tidak ada gambar
+                  <div className="w-full h-full flex items-center justify-center bg-slate-200 text-xs text-slate-500">
+                    No Img
+                  </div>
                 )}
               </div>
               <div className="flex flex-col justify-center">
