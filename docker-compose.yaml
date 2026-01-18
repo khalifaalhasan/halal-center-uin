@@ -19,12 +19,12 @@ services:
       - "9000:9000"
       - "9001:9001"
     environment:
-      MINIO_ROOT_USER: "admin_uin" # Ganti password yang kuat
-      MINIO_ROOT_PASSWORD: "password_super_aman_uin"
-    volumes:
-      - ./minio_data:/data:z # Data fisik tersimpan di folder ini di VPS
+      # Kita set user/pass yang gampang diingat dan PASTI
+      MINIO_ROOT_USER: "minioadmin"
+      MINIO_ROOT_PASSWORD: "minioadmin"
     command: server /data --console-address ":9001"
-    restart: always
+    volumes:
+      - ./minio_data:/data
 
   # 2. SERVICE NEXTJS
   # 3. APLIKASI (Next.js)
@@ -40,6 +40,19 @@ services:
       S3_SECRET_KEY: "password123"
       S3_BUCKET_NAME: "berita"
       S3_REGION: "us-east-1"
+
+      # --- TAMBAHAN WAJIB UNTUK AUTH ---
+      # 1. URL asli website kamu (PENTING)
+      NEXTAUTH_URL: "http://localhost"
+      AUTH_URL: "http://localhost"
+
+      # 2. Secret acak untuk enkripsi cookie (Wajib ada!)
+      # Bisa isi acak apa saja, misal hasil ketikan keyboard
+      AUTH_SECRET: "rahasia_super_kunci_gembok_pagar_rumah_123"
+      NEXTAUTH_SECRET: "rahasia_super_kunci_gembok_pagar_rumah_123"
+
+      # 3. Percayai Proxy (Karena kita pakai Docker/Nginx)
+      AUTH_TRUST_HOST: "true"
     depends_on:
       - db
       - minio
