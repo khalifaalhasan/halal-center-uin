@@ -116,7 +116,7 @@ export default function ProsedurPage() {
                 className="relative flex flex-col md:flex-row items-start md:items-center mb-12 last:mb-0 group"
               >
                 {/* Number Badge */}
-                <div className="absolute left-4 md:left-1/2 -translate-x-1/2 flex items-center justify-center w-10 h-10 rounded-full bg-white border-4 border-slate-50 text-slate-900 font-bold z-10 group-hover:bg-primary-purple group-hover:text-white group-hover:border-purple-100 transition-all duration-300 shadow-sm">
+                <div className="absolute left-4 md:left-1/2 -translate-x-1/2 flex items-center justify-center w-10 h-10 rounded-full bg-white border-4 border-slate-50 text-slate-900 font-bold z-10 group-hover:bg-primary group-hover:text-white group-hover:border-purple-100 transition-all duration-300 shadow-sm">
                   {index + 1}
                 </div>
 
@@ -129,7 +129,7 @@ export default function ProsedurPage() {
                   }`}
                 >
                   <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm group-hover:shadow-md group-hover:border-purple-100 transition-all duration-300">
-                    <h3 className="text-lg font-bold text-slate-800 mb-2 group-hover:text-primary-purple transition-colors">
+                    <h3 className="text-lg font-bold text-slate-800 mb-2 group-hover:text-primary transition-colors">
                       {step.title}
                     </h3>
                     <p className="text-sm text-slate-500 leading-relaxed">

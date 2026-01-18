@@ -1,5 +1,5 @@
 // src/actions/auth.ts
-'use server';
+"use server";
 
 import { signIn } from "@/auth";
 
@@ -11,14 +11,15 @@ export type LoginFormState = {
 
 export async function loginAction(
   prevState: LoginFormState | undefined, // Terima undefined untuk state awal
-  formData: FormData
-): Promise<LoginFormState | undefined> { // Return bisa undefined saat redirect
-  
+  formData: FormData,
+): Promise<LoginFormState | undefined> {
+  // Return bisa undefined saat redirect
+
   try {
     await signIn("credentials", {
       email: formData.get("email"),
       password: formData.get("password"),
-      redirectTo: "/dashboard",
+      redirectTo: "/admin",
     });
   } catch (error) {
     // HANDLING UNKNOWN ERROR
@@ -30,13 +31,13 @@ export async function loginAction(
       }
 
       if (type === "CallbackRouteError") {
-        return { success: false, message:"Gagal Login, Coba lagi."}
+        return { success: false, message: "Gagal Login, Coba lagi." };
       }
     }
     // Wajib re-throw error agar redirect bekerja!
     throw error;
   }
-  
+
   // Secara teknis unreachable karena redirect, tapi TS butuh return
   return { success: true, message: "Login berhasil" };
 }
