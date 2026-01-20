@@ -13,114 +13,122 @@ import {
 } from "lucide-react";
 import { SectionHeader } from "../ui/section-header";
 
-// --- DATA LAYANAN (Sesuai Standar LPH) ---
+// --- DATA LAYANAN ---
 const SERVICES = [
   {
     icon: Utensils,
-    title: "Produk Makanan",
-    description:
-      "Memastikan produk makanan sesuai prinsip halal, mulai dari bahan baku hingga pengemasan.",
+    title: "Makanan", // Dipersingkat biar muat di mobile 2 kolom
+    fullTitle: "Produk Makanan",
+    description: "Bahan baku hingga pengemasan sesuai syariat.",
   },
   {
     icon: Coffee,
-    title: "Produk Minuman",
-    description:
-      "Menjamin bahwa produk minuman bebas dari bahan haram dan memenuhi standar kehalalan.",
+    title: "Minuman",
+    fullTitle: "Produk Minuman",
+    description: "Bebas alkohol dan bahan najis.",
   },
   {
     icon: Pill,
-    title: "Produk Obat",
-    description:
-      "Memastikan bahan aktif maupun eksipien berasal dari sumber yang suci dan halal.",
+    title: "Obat-obatan",
+    fullTitle: "Produk Obat",
+    description: "Bahan aktif suci dan halal.",
   },
   {
     icon: FlaskConical,
-    title: "Produk Kimiawi",
-    description:
-      "Menginspeksi produk kimia agar terbebas dari unsur haram dan sesuai prinsip Islam.",
+    title: "Kimiawi",
+    fullTitle: "Produk Kimiawi",
+    description: "Bebas unsur haram & najis.",
   },
   {
     icon: Sparkles,
-    title: "Produk Kosmetik",
-    description:
-      "Pemeriksaan produk kosmetik agar bebas dari bahan najis dan aman digunakan.",
+    title: "Kosmetik",
+    fullTitle: "Produk Kosmetik",
+    description: "Aman dan suci digunakan.",
   },
   {
     icon: Dna,
-    title: "Bahan Biologi",
-    description:
-      "Produk biologi seperti vaksin & enzim harus dipastikan berasal dari sumber halal.",
+    title: "Biologi",
+    fullTitle: "Bahan Biologi",
+    description: "Vaksin & enzim bersumber halal.",
   },
   {
     icon: Beef,
-    title: "Jasa Penyembelihan",
-    description:
-      "Verifikasi proses penyembelihan hewan agar sesuai dengan syariat Islam.",
+    title: "Penyembelihan",
+    fullTitle: "Jasa Penyembelihan",
+    description: "Sesuai syariat Islam.",
   },
   {
     icon: Factory,
-    title: "Jasa Pengolahan",
-    description:
-      "Audit fasilitas pengolahan untuk mencegah kontaminasi bahan non-halal.",
+    title: "Pengolahan",
+    fullTitle: "Jasa Pengolahan",
+    description: "Cegah kontaminasi fasilitas.",
   },
   {
     icon: Warehouse,
-    title: "Jasa Penyimpanan",
-    description:
-      "Gudang & pengelolaan memastikan pemisahan tegas antara produk halal dan non-halal.",
+    title: "Penyimpanan",
+    fullTitle: "Jasa Penyimpanan",
+    description: "Pemisahan produk tegas.",
   },
   {
     icon: Truck,
-    title: "Jasa Distribusi",
-    description:
-      "Armada distribusi yang menjaga kebersihan dan mencegah kontaminasi silang.",
+    title: "Distribusi",
+    fullTitle: "Jasa Distribusi",
+    description: "Armada bersih & aman.",
   },
   {
     icon: ConciergeBell,
-    title: "Jasa Penyajian",
-    description:
-      "Penyajian restoran/katering yang menjamin peralatan dan tempat saji bebas najis.",
+    title: "Penyajian",
+    fullTitle: "Jasa Penyajian",
+    description: "Resto & katering bebas najis.",
   },
 ];
 
 export default function ServicesGrid() {
   return (
-    <section className="py-20 bg-white">
+    <section className="py-16 md:py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* --- SECTION HEADER --- */}
-
         <SectionHeader
           badge="Layanan Kami"
           title={
             <>
-              Layanan <span className="text-primary">LPH UIN Raden Fatah</span>
+              Lingkup <span className="text-primary">Layanan Halal</span>
             </>
           }
-          subtitle="Kami menyediakan layanan pemeriksaan dan sertifikasi untuk berbagai
-            kategori produk guna memastikan kepatuhan halal."
+          subtitle="Pemeriksaan dan sertifikasi komprehensif untuk berbagai kategori produk."
         />
 
         {/* --- GRID CONTENT --- */}
-        {/* Grid: 1 kolom (HP), 2 kolom (Tablet), 3 kolom (Laptop), 4 kolom (Monitor Besar) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        {/* Mobile: 2 Kolom (grid-cols-2) biar hemat tempat */}
+        {/* Desktop: 4 Kolom biar luas */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6 lg:gap-8 mt-10">
           {SERVICES.map((item, index) => {
             const Icon = item.icon;
 
             return (
               <div
                 key={index}
-                className="group flex flex-col items-center text-center p-6 rounded-2xl transition-all duration-300 hover:bg-slate-50 hover:-translate-y-1"
+                className="group relative flex flex-col items-center text-center p-4 md:p-6 rounded-xl border border-slate-100 bg-white shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300"
               >
                 {/* Icon Circle */}
-                <div className="w-16 h-16 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 mb-6 group-hover:bg-primary group-hover:text-white transition-colors duration-300 shadow-sm">
-                  <Icon size={32} strokeWidth={1.5} />
+                {/* Mobile: Lebih kecil (w-12), Desktop: Normal (w-16) */}
+                <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 mb-3 md:mb-5 group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+                  <Icon className="w-6 h-6 md:w-8 md:h-8" strokeWidth={1.5} />
                 </div>
 
                 {/* Content */}
-                <h3 className="text-xl font-bold text-slate-800 mb-3 group-hover:text-primary transition-colors">
-                  {item.title}
+                {/* Judul: Lebih kecil di mobile */}
+                <h3 className="text-sm md:text-lg font-bold text-slate-800 mb-1 md:mb-2 group-hover:text-primary transition-colors">
+                  <span className="md:hidden">{item.title}</span>{" "}
+                  {/* Judul Pendek di HP */}
+                  <span className="hidden md:inline">
+                    {item.fullTitle}
+                  </span>{" "}
+                  {/* Judul Panjang di PC */}
                 </h3>
-                <p className="text-sm text-slate-500 leading-relaxed">
+
+                {/* Deskripsi: Ukuran font extra small di mobile, disembunyikan jika layar terlalu kecil */}
+                <p className="text-[10px] md:text-sm text-slate-500 leading-snug line-clamp-2 md:line-clamp-3">
                   {item.description}
                 </p>
               </div>

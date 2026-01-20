@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPostBySlug } from "@/services/post-service";
-import { Calendar, User, ArrowLeft, Tag } from "lucide-react";
+import { Calendar, User, ArrowLeft } from "lucide-react"; // Tag dihapus jika tidak dipakai
 import { formatDate } from "@/lib/utils";
 
 interface BlogDetailProps {
@@ -61,6 +61,8 @@ export default async function BlogDetailPage({ params }: BlogDetailProps) {
             fill
             className="object-cover"
             priority
+            // 👇 WAJIB DITAMBAHKAN (Solusi Docker/MinIO)
+            unoptimized={true}
           />
         </div>
       )}
@@ -74,7 +76,7 @@ export default async function BlogDetailPage({ params }: BlogDetailProps) {
         ))}
       </div>
 
-      {/* 4. FOOTER (Tags / Back Button) */}
+      {/* 4. FOOTER (Back Button) */}
       <div className="border-t border-slate-100 pt-6 mt-8 flex justify-between items-center">
         <Link
           href="/blog"
@@ -83,9 +85,6 @@ export default async function BlogDetailPage({ params }: BlogDetailProps) {
           <ArrowLeft size={18} />
           Kembali ke Blog
         </Link>
-
-        {/* Placeholder Share Button (Optional) */}
-        <div className="text-sm text-slate-400">Share this post</div>
       </div>
     </article>
   );

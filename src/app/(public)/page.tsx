@@ -1,6 +1,7 @@
 import AboutSection from "@/components/home/about-section";
 import CtaSihalal from "@/components/home/cta-sihalal";
 import FlowSection from "@/components/home/flow-section";
+import GallerySection from "@/components/home/gallery-section";
 import HeroSection from "@/components/home/hero-section";
 import NewsSection from "@/components/home/news-section";
 import ServicesGrid from "@/components/home/services-grid";
@@ -16,6 +17,7 @@ export default function Home() {
       <AboutSection />
       <FlowSection />
       <ServicesGrid />
+      <GallerySection />
       <NewsSection />
     </div>
   );
