@@ -1,7 +1,7 @@
 import * as Minio from "minio";
 
-// Konfigurasi Client MinIO
-// Pastikan variabel ini ada di .env (lihat langkah 2 di bawah)
+// --- 1. KONFIGURASI CLIENT (Internal Network) ---
+// Ini digunakan Next.js untuk ngobrol sama Container MinIO
 const minioClient = new Minio.Client({
   endPoint: process.env.MINIO_ENDPOINT || "localhost",
   port: parseInt(process.env.MINIO_PORT || "9000"),
@@ -12,14 +12,19 @@ const minioClient = new Minio.Client({
 
 const BUCKET_NAME = process.env.MINIO_BUCKET_NAME || "halal-images";
 
-
-// Fungsi Upload File
+// --- 2. FUNGSI UPLOAD ---
 export async function uploadImage(file: File): Promise<string> {
-  // 1. Pastikan Bucket Ada
+  // A. Validasi File
+  if (!file) throw new Error("File tidak ditemukan.");
+
+  // B. Cek Bucket (Buat otomatis kalo belum ada)
   const bucketExists = await minioClient.bucketExists(BUCKET_NAME);
+
   if (!bucketExists) {
     await minioClient.makeBucket(BUCKET_NAME, "us-east-1");
-    // Set policy agar file bisa dibaca publik (ReadOnly)
+    console.log(`✅ Bucket '${BUCKET_NAME}' berhasil dibuat.`);
+
+    // Set Policy agar Public Read (Wajib biar gambar muncul di Frontend)
     const policy = {
       Version: "2012-10-17",
       Statement: [
@@ -32,39 +37,54 @@ export async function uploadImage(file: File): Promise<string> {
       ],
     };
     await minioClient.setBucketPolicy(BUCKET_NAME, JSON.stringify(policy));
+    console.log(`🔓 Bucket Policy diset ke Public.`);
   }
 
-  // 2. Convert File ke Buffer
+  // C. Convert File ke Buffer
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
 
-  // 3. Buat Nama File Unik (biar gak bentrok)
+  // D. Generate Nama Unik
   const ext = file.name.split(".").pop();
   const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
 
-  // 4. Upload ke MinIO
-  await minioClient.putObject(BUCKET_NAME, fileName, buffer, file.size, {
+  // E. Upload ke MinIO
+  // metaData diset agar browser tahu ini gambar (bukan download file bin)
+  const metaData = {
     "Content-Type": file.type,
-  });
+  };
 
-  // 5. Kembalikan URL Publik (Gunakan localhost:9000 untuk akses browser)
-  // Note: Di production nanti ganti localhost jadi domain server
+  await minioClient.putObject(
+    BUCKET_NAME,
+    fileName,
+    buffer,
+    file.size,
+    metaData,
+  );
+
+  // F. Return URL Publik
+  // PENTING:
+  // - Saat upload, Next.js pakai "minio:9000" (Internal Docker Network).
+  // - Tapi browser user ada di luar Docker, jadi harus akses via "localhost:9000".
   const publicUrl = `http://localhost:9000/${BUCKET_NAME}/${fileName}`;
 
   return publicUrl;
 }
 
+// --- 3. FUNGSI DELETE ---
 export async function deleteImage(fileUrl: string): Promise<void> {
   try {
+    // Ambil nama file dari URL
+    // Contoh: http://localhost:9000/halal-images/17099...jpg -> 17099...jpg
     const urlParts = fileUrl.split("/");
-    const objectName = urlParts[urlParts.length - 1 ];
+    const objectName = urlParts[urlParts.length - 1];
 
     if (!objectName) return;
 
     await minioClient.removeObject(BUCKET_NAME, objectName);
-    console.log(`Delete image: ${objectName}`);
-
+    console.log(`🗑️ Delete image success: ${objectName}`);
   } catch (error) {
-    console.error ("Failed to delete image from storage: ", error);
+    console.error("⚠️ Failed to delete image from storage: ", error);
+    // Kita suppress errornya agar tidak memblokir proses delete data utama di DB
   }
 }
