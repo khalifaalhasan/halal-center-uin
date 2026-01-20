@@ -101,3 +101,24 @@ model Document {
 
   @@map("documents")
 }
+
+
+model TeamMember {
+  id        String  @id @default(cuid())
+  name      String
+  role      String
+  image     String?
+  order     Int     @default(0)
+
+  parentId  String?
+  parent    TeamMember?   @relation("OrgTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children  TeamMember[]  @relation("OrgTree")
+
+  // Field baru untuk Soft Delete
+  deletedAt DateTime? 
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("team_members")
+}

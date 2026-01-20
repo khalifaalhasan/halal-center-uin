@@ -7,33 +7,34 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("🌱 Start seeding...");
 
-  // --- [BAGIAN PENTING: BERSIH-BERSIH] ---
-  // Kita hapus dulu Postingan lama biar tidak error Foreign Key saat hapus User
-  await prisma.post.deleteMany();
-  // Kita hapus User Admin lama (jika ada) biar benar-benar fresh
-  await prisma.user.deleteMany({
-    where: { email: "admin@uin.ac.id" },
-  });
+  // --- [1. BERSIH-BERSIH DATA LAMA] ---
+  // Urutan delete penting untuk menghindari error Foreign Key
+  await prisma.teamMember.deleteMany(); // Hapus Struktur Organisasi
+  await prisma.post.deleteMany();       // Hapus Postingan
+  await prisma.category.deleteMany();   // Hapus Kategori
+  await prisma.user.deleteMany();       // Hapus User
+  
   console.log("🧹 Data lama dibersihkan.");
-  // ---------------------------------------
 
-  // 1. Hash Password
-  const hashedPassword = await bcrypt.hash("admin123", 10);
 
-  // 2. Buat User Admin BARU (Pakai create, karena sudah dihapus di atas)
+  // --- [2. SEED USER ADMIN UTAMA] ---
+  // Hash password sesuai request
+  const hashedPassword = await bcrypt.hash("26maret2005", 10);
+
   const user = await prisma.user.create({
     data: {
-      name: "Admin Halal Center",
-      email: "admin@uin.ac.id",
+      name: "Khalifa Al Hasan",
+      email: "khlfaalhsn5@gmail.com",
       password: hashedPassword,
-      image: "https://ui-avatars.com/api/?name=Admin+Halal&background=random",
+      image: "https://ui-avatars.com/api/?name=Khalifa+Al+Hasan&background=0D8ABC&color=fff",
       role: "ADMIN",
     },
   });
 
-  console.log(`👤 Author created: ${user.name}`);
+  console.log(`👤 Admin created: ${user.email}`);
 
-  // 3. Buat Kategori
+
+  // --- [3. SEED KATEGORI & POSTINGAN] ---
   const categoriesData = [
     { name: "Teknologi", slug: "teknologi" },
     { name: "Berita Utama", slug: "berita-utama" },
@@ -43,16 +44,10 @@ async function main() {
 
   const dbCategories = [];
   for (const c of categoriesData) {
-    // Gunakan upsert untuk kategori gpp, karena jarang konflik
-    const cat = await prisma.category.upsert({
-      where: { slug: c.slug },
-      update: {},
-      create: c,
-    });
+    const cat = await prisma.category.create({ data: c });
     dbCategories.push(cat);
   }
 
-  // 4. Generate Postingan
   console.log("📝 Generating 10 posts...");
   
   for (let i = 0; i < 10; i++) {
@@ -68,6 +63,7 @@ async function main() {
         slug: slug,
         excerpt: faker.lorem.sentences(2),
         content: faker.lorem.paragraphs(5),
+        // Gunakan loremflickr agar gambar bervariasi
         image: faker.image.urlLoremFlickr({ category: "business" }),
         published: true,
         authorId: user.id,
@@ -76,6 +72,54 @@ async function main() {
       },
     });
   }
+
+
+  // --- [4. SEED STRUKTUR ORGANISASI (TEAM MEMBER)] ---
+  console.log("🏢 Seeding Organization Structure...");
+
+  // ROOT: Ketua Halal Center
+  const ketua = await prisma.teamMember.create({
+    data: {
+      name: "Dr. Irham Falahi, M.Si.",
+      role: "Ketua Halal Center",
+      // Kosongkan image atau isi url dummy jika mau
+      image: "https://ui-avatars.com/api/?name=Irham+Falahi&background=random", 
+      order: 1,
+    },
+  });
+
+  // LEVEL 2: Sekretaris (Anak dari Ketua)
+  await prisma.teamMember.create({
+    data: {
+      name: "Ahmad Zarkasih",
+      role: "Sekretaris",
+      parentId: ketua.id, // Relasi ke Ketua
+      image: "https://ui-avatars.com/api/?name=Ahmad+Zarkasih&background=random",
+      order: 1,
+    },
+  });
+
+  // LEVEL 2: Bendahara (Anak dari Ketua)
+  await prisma.teamMember.create({
+    data: {
+      name: "Siti Aminah",
+      role: "Bendahara",
+      parentId: ketua.id, // Relasi ke Ketua
+      image: "https://ui-avatars.com/api/?name=Siti+Aminah&background=random",
+      order: 2,
+    },
+  });
+
+  // LEVEL 2: Koord. Auditor (Anak dari Ketua)
+  await prisma.teamMember.create({
+    data: {
+      name: "Budi Santoso",
+      role: "Koord. Auditor",
+      parentId: ketua.id, // Relasi ke Ketua
+      image: "https://ui-avatars.com/api/?name=Budi+Santoso&background=random",
+      order: 3,
+    },
+  });
 
   console.log("✅ Seeding finished successfully.");
 }

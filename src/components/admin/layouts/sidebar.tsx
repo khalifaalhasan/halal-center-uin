@@ -29,9 +29,9 @@ const routes = [
     href: "/admin/categories",
   },
   {
-    label: "Pengguna",
+    label: "Struktur Organisasi",
     icon: Users,
-    href: "/admin/users",
+    href: "/admin/teams",
   },
   {
     label: "Pengaturan",
