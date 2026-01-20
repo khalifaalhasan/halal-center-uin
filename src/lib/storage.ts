@@ -12,6 +12,7 @@ const minioClient = new Minio.Client({
 
 const BUCKET_NAME = process.env.MINIO_BUCKET_NAME || "halal-images";
 
+
 // Fungsi Upload File
 export async function uploadImage(file: File): Promise<string> {
   // 1. Pastikan Bucket Ada
@@ -51,4 +52,19 @@ export async function uploadImage(file: File): Promise<string> {
   const publicUrl = `http://localhost:9000/${BUCKET_NAME}/${fileName}`;
 
   return publicUrl;
+}
+
+export async function deleteImage(fileUrl: string): Promise<void> {
+  try {
+    const urlParts = fileUrl.split("/");
+    const objectName = urlParts[urlParts.length - 1 ];
+
+    if (!objectName) return;
+
+    await minioClient.removeObject(BUCKET_NAME, objectName);
+    console.log(`Delete image: ${objectName}`);
+
+  } catch (error) {
+    console.error ("Failed to delete image from storage: ", error);
+  }
 }
