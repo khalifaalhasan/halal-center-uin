@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import Image from "next/image"; // Jangan lupa import ini
 import { PostDialog } from "@/components/admin/posts/post-dialog";
 // Pastikan path import delete-button benar (sebelumnya ada typo shared/posts)
-import { DeleteButton } from "@/components/admin/shared/delete-button";
+import { DeleteButton } from "@/components/admin/posts/delete-button";
 import { SearchInput } from "@/components/ui/search-input";
 import {
   Table,
