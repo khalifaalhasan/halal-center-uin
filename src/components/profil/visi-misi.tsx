@@ -87,7 +87,7 @@ export default function VisiMisiPage() {
         />
       </motion.div>
 
-      <section className="py-16 bg-slate-50">
+      <section className="py-16 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
           {/* --- SECTION VISI (Corporate Banner Style) --- */}
           <motion.div
