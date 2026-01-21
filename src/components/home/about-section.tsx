@@ -10,7 +10,6 @@ export default function AboutSection() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          
           {/* 1. KOLOM TEXT */}
           <div className="space-y-8 lg:order-2">
             <div>
@@ -18,17 +17,21 @@ export default function AboutSection() {
                 <span className="w-2 h-2 rounded-full bg-primary" />
                 Profil Lembaga
               </div>
-              
+
               {/* Headline fokus pada "Pemeriksa" */}
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-slate-900 leading-tight">
-                Mitra Pemeriksa Halal <br/>
+                Mitra Pemeriksa Halal <br />
                 <span className="text-primary">Saintifik & Syar'i.</span>
               </h2>
             </div>
 
             {/* Deskripsi fokus pada tugas: Memeriksa & Menguji */}
             <p className="text-lg text-muted-foreground leading-relaxed">
-              Sebagai unit resmi di bawah naungan <strong>UIN Raden Fatah</strong>, kami memiliki mandat dari BPJPH untuk melakukan verifikasi, pemeriksaan lapangan, dan pengujian laboratorium terhadap kehalalan produk Anda sebelum penetapan fatwa MUI.
+              Sebagai unit resmi di bawah naungan{" "}
+              <strong>UIN Raden Fatah</strong>, kami memiliki mandat dari BPJPH
+              untuk melakukan verifikasi, pemeriksaan lapangan, dan pengujian
+              laboratorium terhadap kehalalan produk Anda sebelum penetapan
+              fatwa MUI.
             </p>
 
             {/* Fitur disesuaikan dengan keunggulan Universitas/LPH */}
@@ -56,7 +59,7 @@ export default function AboutSection() {
             {/* CTA Button */}
             <div className="pt-4 flex flex-wrap gap-4">
               <Link
-                href="/profil"
+                href="/tentang-kami"
                 className="inline-flex items-center gap-2 bg-white border border-slate-200 text-slate-700 font-bold px-6 py-3 rounded-full hover:bg-slate-50 transition-all shadow-sm"
               >
                 Lihat Akreditasi Kami <ArrowUpRight size={18} />

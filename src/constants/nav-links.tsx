@@ -8,13 +8,8 @@ export interface navItem {
 export const navLinks: navItem[] = [
   { name: "Beranda", href: "/" },
   {
-    name: "Profil",
-    href: "/profil",
-    submenu: [
-      { name: "Tentang kami", href: "/profil/tentang-kami" },
-      { name: "Visi Misi", href: "/profil/visi-misi" },
-      { name: "Struktur Organisasi", href: "/profil/struktur-organisasi" },
-    ],
+    name: "Tentang Kami",
+    href: "/tentang-kami",
   },
 
   {

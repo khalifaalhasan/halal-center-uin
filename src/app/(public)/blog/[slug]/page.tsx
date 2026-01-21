@@ -2,8 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPostBySlug } from "@/services/post-service";
-import { Calendar, User, ArrowLeft } from "lucide-react"; // Tag dihapus jika tidak dipakai
+import { Calendar, User, ArrowLeft } from "lucide-react";
 import { formatDate } from "@/lib/utils";
+import { Metadata } from "next"; 
 
 interface BlogDetailProps {
   params: Promise<{
@@ -11,6 +12,49 @@ interface BlogDetailProps {
   }>;
 }
 
+
+export async function generateMetadata({
+  params,
+}: BlogDetailProps): Promise<Metadata> {
+  const { slug } = await params;
+  const post = await getPostBySlug(slug);
+
+  if (!post) {
+    return {
+      title: "Artikel Tidak Ditemukan",
+      description: "Halaman yang Anda cari tidak tersedia.",
+    };
+  }
+
+  // Buat deskripsi singkat dari excerpt atau potong konten jika excerpt kosong
+  const description = post.excerpt
+    ? post.excerpt.slice(0, 160)
+    : post.content.slice(0, 160) + "...";
+
+  return {
+    title: post.title,
+    description: description,
+    openGraph: {
+      title: post.title,
+      description: description,
+      type: "article",
+      publishedTime: post.createdAt.toISOString(),
+      authors: [post.author.name],
+      images: post.image // Jika ada gambar, gunakan untuk preview medsos
+        ? [
+            {
+              url: post.image,
+              width: 1200,
+              height: 630,
+              alt: post.title,
+            },
+          ]
+        : undefined,
+    },
+  };
+}
+
+// 👇 3. KOMPONEN PAGE (Tetap seperti sebelumnya)
 export default async function BlogDetailPage({ params }: BlogDetailProps) {
   const { slug } = await params;
   const post = await getPostBySlug(slug);
@@ -61,7 +105,7 @@ export default async function BlogDetailPage({ params }: BlogDetailProps) {
             fill
             className="object-cover"
             priority
-            // 👇 WAJIB DITAMBAHKAN (Solusi Docker/MinIO)
+            
             unoptimized={true}
           />
         </div>

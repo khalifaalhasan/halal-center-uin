@@ -5,6 +5,7 @@ import {
   getOrganizationTree,
   OrgMember,
 } from "@/services/organization-service";
+import { SectionHeader } from "../ui/section-header";
 
 // ==========================================
 // 1. DESKTOP COMPONENT (Tidak Berubah)
@@ -127,11 +128,15 @@ export default async function StrukturOrganisasiPage() {
   const orgData = await getOrganizationTree();
 
   return (
-    <>
-      <PageHeader
-        title="Struktur Organisasi"
-        description="Susunan pengurus LPH UIN Raden Fatah."
-        breadcrumbs={[{ label: "Profil" }, { label: "Struktur Organisasi" }]}
+    <div className="py-30">
+      <SectionHeader
+        badge="Struktur Organisasi"
+        title={
+          <>
+            Pimpinan <span className="text-primary">Halal Center</span>
+          </>
+        }
+        subtitle="usunan pengurus LPH UIN Raden Fatah."
       />
 
       <section className="py-12 bg-white min-h-[60vh]">
@@ -162,6 +167,6 @@ export default async function StrukturOrganisasiPage() {
           )}
         </div>
       </section>
-    </>
+    </div>
   );
 }
