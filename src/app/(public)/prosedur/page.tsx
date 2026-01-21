@@ -1,3 +1,5 @@
+"use client"; // Wajib untuk Framer Motion
+
 import Link from "next/link";
 import { PageHeader } from "@/components/ui/page-header";
 import { ButtonCustom } from "@/components/ui/button-custom";
@@ -10,6 +12,7 @@ import {
   Download,
   ExternalLink,
 } from "lucide-react";
+import { motion } from "framer-motion"; // 1. Import Motion
 
 // --- DATA: ALUR SERTIFIKASI (10 Langkah) ---
 const ALUR_STEPS = [
@@ -94,6 +97,45 @@ const REQUIREMENTS = [
   },
 ];
 
+// --- VARIAN ANIMASI ---
+const timelineContainerVariant = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1, // Muncul berurutan
+    },
+  },
+};
+
+const timelineItemVariant = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: "easeOut" as const },
+  },
+};
+
+const cardVariant = {
+  hidden: { opacity: 0, scale: 0.9, y: 20 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: { duration: 0.4 },
+  },
+};
+
+const ctaVariant = {
+  hidden: { opacity: 0, scale: 0.9 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.5, type: "spring" as const },
+  },
+};
+
 export default function ProsedurPage() {
   return (
     <>
@@ -106,13 +148,26 @@ export default function ProsedurPage() {
       {/* --- SECTION 1: ALUR PROSES (TIMELINE) --- */}
       <section className="py-20 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative">
-            {/* Vertical Line Connector */}
-            <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 bg-slate-100 -translate-x-1/2 md:translate-x-0" />
+          <motion.div
+            className="relative"
+            variants={timelineContainerVariant}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: false, amount: 0.1 }} // Mulai animasi saat 10% masuk layar
+          >
+            {/* Vertical Line Connector (Static or Animated) */}
+            <motion.div
+              initial={{ height: 0 }}
+              whileInView={{ height: "100%" }}
+              viewport={{ once: false }}
+              transition={{ duration: 1.5, ease: "easeInOut" }}
+              className="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 bg-slate-100 -translate-x-1/2 md:translate-x-0 origin-top"
+            />
 
             {ALUR_STEPS.map((step, index) => (
-              <div
+              <motion.div
                 key={index}
+                variants={timelineItemVariant}
                 className="relative flex flex-col md:flex-row items-start md:items-center mb-12 last:mb-0 group"
               >
                 {/* Number Badge */}
@@ -137,9 +192,9 @@ export default function ProsedurPage() {
                     </p>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -156,12 +211,19 @@ export default function ProsedurPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <motion.div
+            className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+            variants={timelineContainerVariant} // Reuse varian staggered
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: false, amount: 0.1 }}
+          >
             {REQUIREMENTS.map((req, index) => {
               const Icon = req.icon;
               return (
-                <div
+                <motion.div
                   key={index}
+                  variants={cardVariant}
                   className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
                 >
                   <div className="w-12 h-12 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 mb-4">
@@ -173,12 +235,15 @@ export default function ProsedurPage() {
                   <p className="text-sm text-slate-500 leading-relaxed">
                     {req.desc}
                   </p>
-                </div>
+                </motion.div>
               );
             })}
 
             {/* Card Tambahan: Download Template */}
-            <div className="bg-indigo-600 rounded-xl p-6 shadow-lg text-white flex flex-col justify-center items-center text-center">
+            <motion.div
+              variants={cardVariant}
+              className="bg-indigo-600 rounded-xl p-6 shadow-lg text-white flex flex-col justify-center items-center text-center"
+            >
               <Download size={32} className="mb-4 opacity-80" />
               <h3 className="text-lg font-bold mb-2">Butuh Template?</h3>
               <p className="text-sm text-indigo-100 mb-6">
@@ -193,14 +258,20 @@ export default function ProsedurPage() {
               >
                 Unduh Format <ExternalLink size={14} />
               </ButtonCustom>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
       {/* --- SECTION 3: CTA --- */}
       <section className="py-16 bg-white border-t border-slate-100">
-        <div className="max-w-4xl mx-auto px-4 text-center">
+        <motion.div
+          className="max-w-4xl mx-auto px-4 text-center"
+          variants={ctaVariant}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: false }}
+        >
           <h2 className="text-2xl font-bold text-slate-900 mb-4">
             Sudah Melengkapi Semua Persyaratan?
           </h2>
@@ -215,7 +286,7 @@ export default function ProsedurPage() {
           >
             Daftar Sekarang di SIHALAL
           </ButtonCustom>
-        </div>
+        </motion.div>
       </section>
     </>
   );
