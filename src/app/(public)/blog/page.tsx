@@ -1,6 +1,13 @@
 import { Suspense } from "react";
 import { PostGrid } from "@/components/blog/blog-grid";
 import { PostListSkeleton } from "@/components/blog/blog-list-skeleton";
+import { Metadata } from "next";
+
+
+export const metadata: Metadata = {
+  title: "Berita & Artikel",
+  description: "Informasi terbaru seputar kegiatan, edukasi, dan regulasi halal terkini.",
+};
 
 export const dynamic = "force-dynamic";
 // Definisi tipe props halaman

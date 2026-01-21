@@ -1,6 +1,7 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { Target, ShieldCheck, Users2, Lightbulb, Globe2 } from "lucide-react";
-
+import { SectionHeader } from "../ui/section-header";
+import branding from "@/constants/branding.json";
 export default function VisiMisiPage() {
   // Data Misi dengan Ikon Spesifik
   const misiData = [
@@ -23,11 +24,16 @@ export default function VisiMisiPage() {
   ];
 
   return (
-    <>
-      <PageHeader
-        title="Visi & Misi"
-        description="Landasan strategis dan tujuan kami dalam membangun ekosistem industri halal yang terpercaya."
-        breadcrumbs={[{ label: "Profil" }, { label: "Visi Misi" }]}
+    <div className="py-20">
+      <SectionHeader
+        badge="Visi Misi"
+        title={
+          <>
+            Visi & Misi{" "}
+            <span className="text-primary">{branding.brand.name}</span>
+          </>
+        }
+        subtitle="Landasan strategis dan tujuan kami dalam membangun ekosistem industri halal yang terpercaya."
       />
 
       <section className="py-16 bg-slate-50">
@@ -99,6 +105,6 @@ export default function VisiMisiPage() {
           </div>
         </div>
       </section>
-    </>
+    </div>
   );
 }
