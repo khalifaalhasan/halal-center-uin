@@ -1,5 +1,9 @@
-import { PageHeader } from "@/components/ui/page-header";
+"use client"; // Wajib untuk Framer Motion
+
 import { Target, ShieldCheck, Users2, Lightbulb, Globe2 } from "lucide-react";
+import { SectionHeader } from "../ui/section-header";
+import branding from "@/constants/branding.json";
+import { motion } from "framer-motion"; // 1. Import Motion
 
 export default function VisiMisiPage() {
   // Data Misi dengan Ikon Spesifik
@@ -22,18 +26,77 @@ export default function VisiMisiPage() {
     },
   ];
 
+  // --- VARIAN ANIMASI ---
+
+  // 1. Animasi untuk Banner Visi (Zoom In halus)
+  const bannerVariant = {
+    hidden: { opacity: 0, scale: 0.95, y: 20 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      y: 0,
+      transition: { duration: 0.8, ease: "easeOut" as const },
+    },
+  };
+
+  // 2. Animasi Container Grid Misi (Orchestrator)
+  const gridContainerVariant = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15, // Delay antar item misi
+      },
+    },
+  };
+
+  // 3. Animasi Item Misi (Slide Up)
+  const itemVariant = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5, ease: "easeOut" as const },
+    },
+  };
+
+  // 4. Animasi Header & Divider
+  const simpleFadeUp = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+  };
+
   return (
-    <>
-      <PageHeader
-        title="Visi & Misi"
-        description="Landasan strategis dan tujuan kami dalam membangun ekosistem industri halal yang terpercaya."
-        breadcrumbs={[{ label: "Profil" }, { label: "Visi Misi" }]}
-      />
+    <div className="py-20">
+      {/* Header Wrapper Animation */}
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: false, amount: 0.5 }}
+        variants={simpleFadeUp}
+      >
+        <SectionHeader
+          badge="Visi Misi"
+          title={
+            <>
+              Visi & Misi{" "}
+              <span className="text-primary">{branding.brand.name}</span>
+            </>
+          }
+          subtitle="Landasan strategis dan tujuan kami dalam membangun ekosistem industri halal yang terpercaya."
+        />
+      </motion.div>
 
       <section className="py-16 bg-slate-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
           {/* --- SECTION VISI (Corporate Banner Style) --- */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-[#2c2f4e] to-indigo-900 p-8 md:p-12 shadow-xl ring-1 ring-white/10">
+          <motion.div
+            className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-[#2c2f4e] to-indigo-900 p-8 md:p-12 shadow-xl ring-1 ring-white/10"
+            variants={bannerVariant}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: false, amount: 0.3 }} // Animasi ulang saat scroll
+          >
             {/* Subtle Pattern Grid Background */}
             <div
               className="absolute inset-0 z-0 opacity-[0.05]"
@@ -59,32 +122,46 @@ export default function VisiMisiPage() {
                 </p>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* --- SECTION MISI (Strategic Grid Style) --- */}
           <div>
-            <div className="flex items-center gap-4 mb-8">
+            {/* Divider Animation */}
+            <motion.div
+              className="flex items-center gap-4 mb-8"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: false }}
+              variants={simpleFadeUp}
+            >
               <div className="h-px flex-1 bg-slate-200"></div>
               <h2 className="text-xl font-bold text-slate-800 uppercase tracking-wider text-center">
                 Misi Strategis
               </h2>
               <div className="h-px flex-1 bg-slate-200"></div>
-            </div>
+            </motion.div>
 
-            {/* Grid 2x2 untuk tampilan compact di desktop */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Grid Misi dengan Staggered Animation */}
+            <motion.div
+              className="grid grid-cols-1 md:grid-cols-2 gap-6"
+              variants={gridContainerVariant}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: false, amount: 0.1 }}
+            >
               {misiData.map((item, index) => {
                 const Icon = item.icon;
                 return (
-                  <div
+                  <motion.div
                     key={index}
+                    variants={itemVariant}
                     className="group bg-white p-6 rounded-xl border border-slate-200 hover:border-indigo-300 hover:shadow-md transition-all duration-300 flex items-start gap-5"
                   >
                     <div className="flex-shrink-0 w-12 h-12 bg-slate-100 text-slate-600 group-hover:bg-indigo-50 group-hover:text-indigo-600 rounded-lg flex items-center justify-center transition-colors">
                       <Icon size={24} strokeWidth={1.5} />
                     </div>
                     <div>
-                      {/* Menambahkan nomor urut kecil untuk kesan struktural */}
+                      {/* Menambahkan nomor urut kecil */}
                       <span className="block text-xs font-bold text-slate-400 mb-2">
                         0{index + 1}
                       </span>
@@ -92,13 +169,13 @@ export default function VisiMisiPage() {
                         {item.text}
                       </p>
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
-    </>
+    </div>
   );
 }
