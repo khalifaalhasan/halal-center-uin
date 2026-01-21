@@ -9,7 +9,7 @@ export default async function StrukturOrganisasiPage() {
   const orgData = await getOrganizationTree();
 
   return (
-    <div className="py-20 bg-slate-50 min-h-screen">
+    <div className="py-20 bg-white min-h-screen">
       {/* Container utama diberi warna background sedikit */}
 
       <SectionHeader
