@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-// ... imports lainnya (Button, Dialog, Input, etc) ...
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -23,7 +22,8 @@ import {
 } from "@/components/ui/select";
 import { createPost, updatePost } from "@/actions/posts";
 import { toast } from "sonner";
-import { Plus, Pencil, ImageIcon, CalendarIcon } from "lucide-react"; // Tambah Icon Calendar
+import { Plus, Pencil, ImageIcon, CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils"; // Pastikan punya util cn dari shadcn
 
 interface PostDialogProps {
   categories: { id: string; name: string }[];
@@ -34,7 +34,7 @@ interface PostDialogProps {
     categoryId: string | null;
     published: boolean;
     image: string | null;
-    createdAt: Date; // ✅ Tambahkan ini biar kita bisa ambil tanggal lama
+    createdAt: Date;
   } | null;
 }
 
@@ -43,9 +43,15 @@ export function PostDialog({ categories, post }: PostDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
 
+  // --- STATE BARU: Menyimpan Error Validasi ---
+  const [validationErrors, setValidationErrors] = useState<
+    Record<string, string[] | undefined>
+  >({});
+
   useEffect(() => {
     if (open) {
       setPreview(post?.image || null);
+      setValidationErrors({}); // Reset error saat dialog dibuka
     } else {
       setPreview(null);
     }
@@ -59,35 +65,46 @@ export function PostDialog({ categories, post }: PostDialogProps) {
     }
   };
 
-  // --- [HELPER: Format Date ke String Input HTML] ---
-  // Input datetime-local butuh format: "YYYY-MM-DDTHH:mm"
   const getDefaultDate = () => {
     if (post?.createdAt) {
       const date = new Date(post.createdAt);
-      // Mengoreksi timezone offset agar tampil sesuai jam lokal user
       const offset = date.getTimezoneOffset() * 60000;
       const localISOTime = new Date(date.getTime() - offset)
         .toISOString()
         .slice(0, 16);
       return localISOTime;
     }
-    return undefined; // Create mode: kosongin aja (nanti dihandle server jadi NOW)
+    return undefined;
   };
-  // --------------------------------------------------
 
+  // --- UPDATE LOGIC SUBMIT ---
   async function handleSubmit(formData: FormData) {
     setIsLoading(true);
+    setValidationErrors({}); // Reset error sebelum submit
+
     try {
+      let response;
+
       if (post) {
-        await updatePost(post.id, formData);
-        toast.success("Berita berhasil diperbarui!");
+        response = await updatePost(post.id, formData);
       } else {
-        await createPost(formData);
-        toast.success("Berita berhasil dibuat!");
+        response = await createPost(formData);
       }
-      setOpen(false);
+
+      if (response.success) {
+        toast.success(response.message);
+        setOpen(false);
+      } else {
+        // JIKA GAGAL
+        toast.error(response.message);
+
+        // Jika ada error spesifik field, simpan ke state
+        if (response.errors) {
+          setValidationErrors(response.errors);
+        }
+      }
     } catch (error) {
-      toast.error((error as Error).message);
+      toast.error("Terjadi kesalahan jaringan atau sistem.");
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -149,16 +166,32 @@ export function PostDialog({ categories, post }: PostDialogProps) {
 
           {/* ... Judul ... */}
           <div className="grid gap-2">
-            <Label htmlFor="title">Judul</Label>
+            <Label
+              htmlFor="title"
+              className={cn(validationErrors.title ? "text-red-500" : "")}
+            >
+              Judul
+            </Label>
             <Input
               id="title"
               name="title"
               defaultValue={post?.title}
-              required
+              // Hapus required HTML agar validasi server bisa diuji
+              className={cn(
+                validationErrors.title
+                  ? "border-red-500 focus-visible:ring-red-500"
+                  : "",
+              )}
             />
+            {/* ERROR MESSAGE KHUSUS TITLE */}
+            {validationErrors.title && (
+              <p className="text-[10px] text-red-500 font-medium">
+                {validationErrors.title[0]}
+              </p>
+            )}
           </div>
 
-          {/* --- [BARU: INPUT TANGGAL] --- */}
+          {/* ... Tanggal ... */}
           <div className="grid gap-2">
             <Label htmlFor="date">Tanggal & Waktu Publish</Label>
             <div className="relative">
@@ -167,7 +200,7 @@ export function PostDialog({ categories, post }: PostDialogProps) {
                 type="datetime-local"
                 id="date"
                 name="date"
-                className="pl-9" // Padding kiri biar gak nabrak icon
+                className="pl-9"
                 defaultValue={getDefaultDate()}
               />
             </div>
@@ -175,17 +208,21 @@ export function PostDialog({ categories, post }: PostDialogProps) {
               *Kosongkan untuk menggunakan waktu sekarang (saat ini).
             </p>
           </div>
-          {/* ----------------------------- */}
 
           {/* ... Kategori ... */}
           <div className="grid gap-2">
-            <Label htmlFor="category">Kategori</Label>
-            <Select
-              name="categoryId"
-              defaultValue={post?.categoryId || ""}
-              required
+            <Label
+              htmlFor="category"
+              className={cn(validationErrors.categoryId ? "text-red-500" : "")}
             >
-              <SelectTrigger>
+              Kategori
+            </Label>
+            <Select name="categoryId" defaultValue={post?.categoryId || ""}>
+              <SelectTrigger
+                className={cn(
+                  validationErrors.categoryId ? "border-red-500" : "",
+                )}
+              >
                 <SelectValue placeholder="Pilih Kategori" />
               </SelectTrigger>
               <SelectContent>
@@ -196,18 +233,39 @@ export function PostDialog({ categories, post }: PostDialogProps) {
                 ))}
               </SelectContent>
             </Select>
+            {/* ERROR MESSAGE KHUSUS KATEGORI */}
+            {validationErrors.categoryId && (
+              <p className="text-[10px] text-red-500 font-medium">
+                {validationErrors.categoryId[0]}
+              </p>
+            )}
           </div>
 
           {/* ... Konten ... */}
           <div className="grid gap-2">
-            <Label htmlFor="content">Konten</Label>
+            <Label
+              htmlFor="content"
+              className={cn(validationErrors.content ? "text-red-500" : "")}
+            >
+              Konten
+            </Label>
             <Textarea
               id="content"
               name="content"
               defaultValue={post?.content || ""}
-              className="h-24 sm:h-32"
-              required
+              className={cn(
+                "h-24 sm:h-32",
+                validationErrors.content
+                  ? "border-red-500 focus-visible:ring-red-500"
+                  : "",
+              )}
             />
+            {/* ERROR MESSAGE KHUSUS KONTEN */}
+            {validationErrors.content && (
+              <p className="text-[10px] text-red-500 font-medium">
+                {validationErrors.content[0]}
+              </p>
+            )}
           </div>
 
           {/* ... Published Checkbox ... */}
