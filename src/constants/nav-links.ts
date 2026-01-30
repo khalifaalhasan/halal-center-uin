@@ -17,9 +17,13 @@ export const navLinks: navItem[] = [
     href: "/layanan",
     // Menambahkan submenu untuk dropdown
     submenu: [
-      { name: "Ruang Lingkup", href: "/layanan/ruang-lingkup" },
-      { name: "Daftar Pelaku Usaha", href: "/layanan/daftar-pelaku-usaha" },
-      { name: "Kalkulator Biaya", href: "/layanan/kalkulator-biaya" },
+      { name: "LPH (Ruang Lingkup)", href: "/layanan/ruang-lingkup" },
+      {
+        name: "LP3H",
+        href: "https://bpjph.halal.go.id/data-rekapitulasi-sehati/",
+        isExternal: true,
+      },
+      // { name: "Kalkulator Biaya", href: "/layanan/kalkulator-biaya" },
       {
         name: "Formulir Layanan",
         href: "https://bpjph.halal.go.id/detail/informasi-1",
