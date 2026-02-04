@@ -22,27 +22,23 @@ jobs:
           password: ${{ secrets.VPS_PASSWORD }}
           port: ${{ secrets.VPS_PORT }}
           script: |
-            # Masuk folder
             cd /home/pustipd/halal-center
-
-            # Update kodingan
+            
+            # 1. Reset Hard (Jaga-jaga biar gak konflik file kayak tadi)
             git fetch --all
-            git checkout main
-            git pull origin main
-
-            # Matikan container lama
+            git reset --hard origin/main
+            
+            # 2. Matikan container
             docker compose down
-
-            # Build ulang (No Cache biar env baru masuk)
-            docker compose up -d --build --no-cache
-
-            # Tunggu DB ready
+            
+            # 3. Build dulu (tanpa cache)
+            docker compose build --no-cache
+            
+            # 4. Baru dinyalakan
+            docker compose up -d
+            
             sleep 10
-
-            # Sync Database
             docker exec halal_web npx prisma db push --skip-generate
-
-            # Bersih-bersih image sampah
             docker image prune -f
-
-            echo "✅ Deployment Sukses via Port 1993!"
+            
+            echo "✅ Deployment Benar-benar Sukses!"
