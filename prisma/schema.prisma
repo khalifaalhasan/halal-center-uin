@@ -1,4 +1,4 @@
-// prisma/schema.prisma
+
 
 generator client {
   provider      = "prisma-client-js"
@@ -14,6 +14,11 @@ datasource db {
 
 
 // ADMIN & AUTH
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  USER
+}
 
 model User {
   id String @id @default(cuid())
@@ -21,7 +26,7 @@ model User {
   email String @unique
   password String
   image String?
-  role String @default("admin")
+  role String @default("USER")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

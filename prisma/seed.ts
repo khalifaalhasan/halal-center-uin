@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
-import { fakerID_ID as faker } from "@faker-js/faker";
-import * as bcrypt from "bcrypt";
+import * as bcrypt from "bcryptjs";
+import { fakerID_ID as faker } from "@faker-js/faker"; // Pakai locale Indonesia
 
 const prisma = new PrismaClient();
 
@@ -8,74 +8,125 @@ async function main() {
   console.log("🌱 Start seeding...");
 
   // --- [1. BERSIH-BERSIH DATA LAMA] ---
-  // Urutan delete penting untuk menghindari error Foreign Key
-  await prisma.teamMember.deleteMany(); // Hapus Struktur Organisasi
-  await prisma.post.deleteMany();       // Hapus Postingan
-  await prisma.category.deleteMany();   // Hapus Kategori
-  await prisma.user.deleteMany();       // Hapus User
+  // Urutan delete penting (Child dulu baru Parent)
+  await prisma.teamMember.deleteMany();
+  await prisma.post.deleteMany();
+  await prisma.category.deleteMany();
+  await prisma.user.deleteMany();
+
+  console.log("🧹 Database dibersihkan.");
+
+  // --- [2. PERSIAPAN PASSWORD HASH] ---
+  const passwordKhalifa = await bcrypt.hash("26maret2005", 10);
+  const passwordLPH = await bcrypt.hash("lphuinradenfatah2025", 10);
+
+  // --- [3. CREATE USER (Tampung di variabel biar bisa diambil ID-nya)] ---
   
-  console.log("🧹 Data lama dibersihkan.");
-
-
-  // --- [2. SEED USER ADMIN UTAMA] ---
-  // Hash password sesuai request
-  const hashedPassword = await bcrypt.hash("26maret2005", 10);
-
-  const user = await prisma.user.create({
+  // User 1: Super Admin
+  const userSuper = await prisma.user.create({
     data: {
       name: "Khalifa Al Hasan",
       email: "khlfaalhsn5@gmail.com",
-      password: hashedPassword,
-      image: "https://ui-avatars.com/api/?name=Khalifa+Al+Hasan&background=0D8ABC&color=fff",
-      role: "ADMIN",
+      password: passwordKhalifa,
+      role: "SUPER_ADMIN",
+      image: "https://ui-avatars.com/api/?name=Khalifa+Super&background=7c3aed&color=fff",
     },
   });
+  console.log("✅ Created: SUPER_ADMIN (khlfaalhsn5@gmail.com)");
 
-  console.log(`👤 Admin created: ${user.email}`);
+  // User 2: Admin Biasa
+  const userAdmin = await prisma.user.create({
+    data: {
+      name: "Khalifa Admin",
+      email: "khalifaalhasann@gmail.com",
+      password: passwordKhalifa,
+      role: "ADMIN",
+      image: "https://ui-avatars.com/api/?name=Khalifa+Admin&background=10b981&color=fff",
+    },
+  });
+  console.log("✅ Created: ADMIN (khalifaalhasann@gmail.com)");
 
+  // User 3: Super Admin LPH
+  const userLPH = await prisma.user.create({
+    data: {
+      name: "LPH UIN Raden Fatah",
+      email: "lph@radenfatah.ac.id",
+      password: passwordLPH,
+      role: "SUPER_ADMIN",
+      image: "https://ui-avatars.com/api/?name=LPH+UIN&background=f59e0b&color=fff",
+    },
+  });
+  console.log("✅ Created: SUPER_ADMIN (lph@radenfatah.ac.id)");
 
-  // --- [3. SEED KATEGORI & POSTINGAN] ---
-  const categoriesData = [
-    { name: "Teknologi", slug: "teknologi" },
-    { name: "Berita Utama", slug: "berita-utama" },
-    { name: "Edukasi Halal", slug: "edukasi-halal" },
-    { name: "Gaya Hidup", slug: "gaya-hidup" },
+  // Kumpulkan User ID untuk random author post
+  const allUserIds = [userSuper.id, userAdmin.id, userLPH.id];
+
+  // --- [4. CREATE CATEGORIES] ---
+  const categoryNames = [
+    "Berita Utama",
+    "Edukasi Halal",
+    "Kegiatan UIN",
+    "Opini & Artikel",
+    "Teknologi Pangan"
   ];
 
-  const dbCategories = [];
-  for (const c of categoriesData) {
-    const cat = await prisma.category.create({ data: c });
-    dbCategories.push(cat);
+  const categoryIds: string[] = [];
+
+  console.log("📝 Creating Categories...");
+  for (const name of categoryNames) {
+    // Bikin slug manual simple
+    const slug = name.toLowerCase().replace(/ /g, "-").replace(/[^\w-]+/g, "");
+    
+    const cat = await prisma.category.create({
+      data: {
+        name: name,
+        slug: slug,
+      },
+    });
+    categoryIds.push(cat.id);
   }
 
-  console.log("📝 Generating 10 posts...");
-  
-  for (let i = 0; i < 10; i++) {
-    const title = faker.lorem.sentence({ min: 4, max: 8 });
+  // --- [5. CREATE POSTS (BERITA)] ---
+  console.log("📰 Generating 20 Dummy Posts...");
+
+  for (let i = 0; i < 20; i++) {
+    const title = faker.lorem.sentence({ min: 4, max: 9 });
+    // Bikin slug unik + random string biar gak bentrok
     const slug = title
       .toLowerCase()
       .replace(/ /g, "-")
-      .replace(/[^\w-]+/g, "") + "-" + faker.string.alphanumeric(4);
+      .replace(/[^\w-]+/g, "") + "-" + faker.string.alphanumeric(5);
+
+    // Random Author & Category
+    const randomAuthorId = allUserIds[Math.floor(Math.random() * allUserIds.length)];
+    const randomCategoryId = categoryIds[Math.floor(Math.random() * categoryIds.length)];
 
     await prisma.post.create({
       data: {
         title: title,
         slug: slug,
-        excerpt: faker.lorem.sentences(2),
-        content: faker.lorem.paragraphs(5),
-        // Gunakan loremflickr agar gambar bervariasi
-        image: faker.image.urlLoremFlickr({ category: "business" }),
-        published: true,
-        authorId: user.id,
-        categoryId: dbCategories[Math.floor(Math.random() * dbCategories.length)].id,
-        createdAt: faker.date.past(),
+        excerpt: faker.lorem.paragraph(1), // Ringkasan pendek
+        content: `
+          <p>${faker.lorem.paragraph()}</p>
+          <h2>${faker.lorem.sentence()}</h2>
+          <p>${faker.lorem.paragraph()}</p>
+          <ul>
+            <li>${faker.lorem.words(4)}</li>
+            <li>${faker.lorem.words(4)}</li>
+            <li>${faker.lorem.words(4)}</li>
+          </ul>
+          <p>${faker.lorem.paragraph()}</p>
+        `, // Simulasi HTML content
+        image: faker.image.urlLoremFlickr({ category: "business" }), // Gambar random
+        published: faker.datatype.boolean(0.8), // 80% kemungkinan published
+        authorId: randomAuthorId,
+        categoryId: randomCategoryId,
+        createdAt: faker.date.past(), // Tanggal acak di masa lalu
       },
     });
   }
 
-
-
-  console.log("✅ Seeding finished successfully.");
+  console.log("🚀 Seeding finished successfully.");
 }
 
 main()
