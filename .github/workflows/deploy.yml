@@ -1,22 +1,48 @@
-- name: SSH and Deploy
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.VPS_HOST }}      # 103.84.119.233
-        username: ${{ secrets.VPS_USER }}  # pustipd
-        password: ${{ secrets.VPS_PASSWORD }} # Password user pustipd
-        port: ${{ secrets.VPS_PORT }}      # 1993
-        script: |
-          cd /home/pustipd/halal-center
-          
-          # Gak perlu sudo buat git
-          git fetch --all
-          git checkout main
-          git pull origin main
-          
-          # Gak perlu sudo buat docker (karena sudah dimasukin group)
-          docker compose down
-          docker compose up -d --build --no-cache
-          
-          sleep 10
-          docker exec halal_web npx prisma db push --skip-generate
-          docker image prune -f
+name: Deploy Production by Tag
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  deploy:
+    name: Deploy to VPS
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: SSH and Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          port: ${{ secrets.VPS_PORT }}
+          script: |
+            # Masuk folder
+            cd /home/pustipd/halal-center
+            
+            # Update kodingan
+            git fetch --all
+            git checkout main
+            git pull origin main
+            
+            # Matikan container lama
+            docker compose down
+            
+            # Build ulang (No Cache biar env baru masuk)
+            docker compose up -d --build --no-cache
+            
+            # Tunggu DB ready
+            sleep 10
+            
+            # Sync Database
+            docker exec halal_web npx prisma db push --skip-generate
+            
+            # Bersih-bersih image sampah
+            docker image prune -f
+            
+            echo "✅ Deployment Sukses via Port 1993!"
