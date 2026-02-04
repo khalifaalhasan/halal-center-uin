@@ -1,13 +1,10 @@
-
 import { Navbar } from "@/components/layouts/navbar/navbar";
 import { Footer } from "@/components/layouts/footer";
 import { Metadata } from "next";
 
-
-
 // Setup Base URL (PENTING untuk SEO Gambar)
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL 
-  ? process.env.NEXT_PUBLIC_BASE_URL 
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
+  ? process.env.NEXT_PUBLIC_BASE_URL
   : "http://localhost:3000";
 
 export const metadata: Metadata = {
@@ -15,13 +12,25 @@ export const metadata: Metadata = {
   // Template Judul: "%s" akan diganti dengan judul di halaman anak
   title: {
     default: "Halal Center UIN Raden Fatah Palembang",
-    template: "%s | Halal Center UIN Raden Fatah", 
+    template: "%s | Halal Center UIN Raden Fatah",
   },
-  description: "Lembaga Pemeriksa Halal terpercaya, profesional, dan akuntabel di Sumatera Selatan. Melayani sertifikasi halal untuk UMKM dan Perusahaan.",
-  keywords: ["Halal Center", "Halal Center Raden Fatah", "Sertifikasi Halal Palembang", "Audit Halal", "LPPOM MUI Sumsel"],
-  authors: [{ name: "Khalifa Al-Hasan Mahasiswa UIN Raden Fatah Palembang", url: baseUrl }],
+  description:
+    "Lembaga Pemeriksa Halal terpercaya, profesional, dan akuntabel di Sumatera Selatan. Melayani sertifikasi halal untuk UMKM dan Perusahaan.",
+  keywords: [
+    "Halal Center",
+    "Halal Center Raden Fatah",
+    "Sertifikasi Halal Palembang",
+    "Audit Halal",
+    "LPPOM MUI Sumsel",
+  ],
+  authors: [
+    {
+      name: "Khalifa Al-Hasan Mahasiswa UIN Raden Fatah Palembang",
+      url: baseUrl,
+    },
+  ],
   creator: "Halal Center UIN Raden Fatah",
-  
+
   // Konfigurasi OpenGraph (Facebook, LinkedIn, WhatsApp)
   openGraph: {
     type: "website",
@@ -32,7 +41,7 @@ export const metadata: Metadata = {
     description: "Layanan pemeriksaan dan sertifikasi halal profesional.",
     images: [
       {
-        url: "/og-image.jpg", 
+        url: "/og-image.jpg",
         width: 1200,
         height: 630,
         alt: "Gedung LPH UIN Raden Fatah",
@@ -62,19 +71,16 @@ export const metadata: Metadata = {
   },
 };
 
-
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body>
-        <Navbar />
-        {children}
-        <Footer />
-      </body>
-    </html>
+    <main>
+      <Navbar />
+      {children}
+      <Footer />
+    </main>
   );
 }
