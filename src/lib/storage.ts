@@ -1,30 +1,33 @@
 import * as Minio from "minio";
 
-// --- 1. KONFIGURASI CLIENT (Internal Network) ---
-// Ini digunakan Next.js untuk ngobrol sama Container MinIO
+// --- 1. KONFIGURASI CLIENT ---
+// Kita ambil dari S3_... sesuai docker-compose.yml
+// Penting: MinIO Library minta hostname TANPA http:// dan TANPA Port
+const endPointUrl = process.env.S3_ENDPOINT || "minio"; 
+const endPointClean = endPointUrl.replace("http://", "").replace(":9000", "");
+
 const minioClient = new Minio.Client({
-  endPoint: process.env.MINIO_ENDPOINT || "localhost",
-  port: parseInt(process.env.MINIO_PORT || "9000"),
-  useSSL: process.env.MINIO_USE_SSL === "true",
-  accessKey: process.env.MINIO_ACCESS_KEY || "minioadmin",
-  secretKey: process.env.MINIO_SECRET_KEY || "minioadmin",
+  endPoint: endPointClean, // Harusnya hasilnya "minio"
+  port: 9000,
+  useSSL: false,
+  accessKey: process.env.S3_ACCESS_KEY || "minioadmin",
+  secretKey: process.env.S3_SECRET_KEY || "minioadmin",
 });
 
-const BUCKET_NAME = process.env.MINIO_BUCKET_NAME || "halal-images";
+const BUCKET_NAME = process.env.S3_BUCKET_NAME || "berita";
 
 // --- 2. FUNGSI UPLOAD ---
 export async function uploadImage(file: File): Promise<string> {
   // A. Validasi File
   if (!file) throw new Error("File tidak ditemukan.");
 
-  // B. Cek Bucket (Buat otomatis kalo belum ada)
+  // B. Cek Bucket (Otomatis buat kalau belum ada)
   const bucketExists = await minioClient.bucketExists(BUCKET_NAME);
 
   if (!bucketExists) {
     await minioClient.makeBucket(BUCKET_NAME, "us-east-1");
-    console.log(`✅ Bucket '${BUCKET_NAME}' berhasil dibuat.`);
-
-    // Set Policy agar Public Read (Wajib biar gambar muncul di Frontend)
+    
+    // Set Policy Public Read
     const policy = {
       Version: "2012-10-17",
       Statement: [
@@ -37,54 +40,41 @@ export async function uploadImage(file: File): Promise<string> {
       ],
     };
     await minioClient.setBucketPolicy(BUCKET_NAME, JSON.stringify(policy));
-    console.log(`🔓 Bucket Policy diset ke Public.`);
   }
 
-  // C. Convert File ke Buffer
+  // C. Convert & Upload
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
-
-  // D. Generate Nama Unik
   const ext = file.name.split(".").pop();
   const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
+  const metaData = { "Content-Type": file.type };
 
-  // E. Upload ke MinIO
-  // metaData diset agar browser tahu ini gambar (bukan download file bin)
-  const metaData = {
-    "Content-Type": file.type,
-  };
+  await minioClient.putObject(BUCKET_NAME, fileName, buffer, file.size, metaData);
 
-  await minioClient.putObject(
-    BUCKET_NAME,
-    fileName,
-    buffer,
-    file.size,
-    metaData,
-  );
-
-  // F. Return URL Publik
-  // PENTING:
-  // - Saat upload, Next.js pakai "minio:9000" (Internal Docker Network).
-  // - Tapi browser user ada di luar Docker, jadi harus akses via "localhost:9000".
-  const publicUrl = `http://localhost:9000/${BUCKET_NAME}/${fileName}`;
-
-  return publicUrl;
+  // F. Return URL Publik (YANG BENAR)
+  // Kita harus bedakan alamat internal (docker) dan eksternal (browser)
+  // Kalau ada env var NEXT_PUBLIC_MINIO_URL, pakai itu. Kalau gak, pakai IP VPS.
+  
+  const publicHost = process.env.NEXT_PUBLIC_MINIO_URL || "http://localhost:9001"; // Ganti port 9001 (Browser akses)
+  
+  // Hati-hati: Browser akses port 9001, tapi URL gambar MinIO biasanya tetap via port API (9000)
+  // TAPI karena kita pakai Docker Port Forwarding:
+  // Browser User -> VPS:9000 -> MinIO:9000
+  
+  // Jadi URL publiknya:
+  const finalHost = process.env.NEXT_PUBLIC_MINIO_URL || "http://103.84.119.130:9000"; 
+  
+  return `${finalHost}/${BUCKET_NAME}/${fileName}`;
 }
 
-// --- 3. FUNGSI DELETE ---
+// --- 3. DELETE ---
 export async function deleteImage(fileUrl: string): Promise<void> {
-  try {
-    // Ambil nama file dari URL
-    // Contoh: http://localhost:9000/halal-images/17099...jpg -> 17099...jpg
-    const urlParts = fileUrl.split("/");
-    const objectName = urlParts[urlParts.length - 1];
-
-    if (!objectName) return;
-
-    await minioClient.removeObject(BUCKET_NAME, objectName);
-    console.log(`🗑️ Delete image success: ${objectName}`);
-  } catch (error) {
-    console.error("⚠️ Failed to delete image from storage: ", error);
-    // Kita suppress errornya agar tidak memblokir proses delete data utama di DB
-  }
+    try {
+      const urlParts = fileUrl.split("/");
+      const objectName = urlParts[urlParts.length - 1];
+      if (!objectName) return;
+      await minioClient.removeObject(BUCKET_NAME, objectName);
+    } catch (error) {
+      console.error("Delete failed:", error);
+    }
 }

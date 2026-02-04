@@ -45,7 +45,8 @@ services:
       S3_BUCKET_NAME: "berita"
       S3_REGION: "us-east-1"
       # Gunakan domain asli untuk NextAuth
-      NEXTAUTH_URL: "https://halal.radenfatah.ac.id" 
+      NEXTAUTH_URL: "https://lph.radenfatah.ac.id"
+      NEXT_PUBLIC_MINIO_URL: "http://103.84.119.130:9000"
       AUTH_TRUST_HOST: "true"
       AUTH_SECRET: "rahasia_super_kunci_gembok_pagar_rumah_123"
     depends_on:
@@ -61,7 +62,7 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro,z
     # Kita pindahkan portnya agar tidak bentrok dengan port 80 VPS
     ports:
-      - "8081:80" 
+      - "8081:80"
     depends_on:
       - web
 
