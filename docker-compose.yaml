@@ -46,7 +46,7 @@ services:
       S3_REGION: "us-east-1"
       # Gunakan domain asli untuk NextAuth
       NEXTAUTH_URL: "https://lph.radenfatah.ac.id"
-      NEXT_PUBLIC_MINIO_URL: "http://103.84.119.130:9000"
+      NEXT_PUBLIC_MINIO_URL: "https://lph.radenfatah.ac.id"
       AUTH_TRUST_HOST: "true"
       AUTH_SECRET: "rahasia_super_kunci_gembok_pagar_rumah_123"
     depends_on:
