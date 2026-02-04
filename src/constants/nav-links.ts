@@ -20,10 +20,10 @@ export const navLinks: navItem[] = [
       { name: "LPH (Ruang Lingkup)", href: "/layanan/ruang-lingkup" },
       {
         name: "LP3H",
-        href: "https://bpjph.halal.go.id/data-rekapitulasi-sehati/",
+        href: "https://ptsp.halal.go.id/",
         isExternal: true,
       },
-      // { name: "Kalkulator Biaya", href: "/layanan/kalkulator-biaya" },
+      { name: "Kalkulator Biaya", href: "/layanan/kalkulator-biaya" },
       {
         name: "Formulir Layanan",
         href: "https://bpjph.halal.go.id/detail/informasi-1",
