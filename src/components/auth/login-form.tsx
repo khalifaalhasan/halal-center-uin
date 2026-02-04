@@ -1,89 +1,115 @@
 // src/components/auth/login-form.tsx
-'use client'
+"use client";
 
-import { useFormState, useFormStatus } from 'react-dom'
-import { loginAction, LoginFormState } from '@/actions/auth' 
-import { Lock, Mail, AlertCircle } from 'lucide-react'
-import { useActionState } from 'react'
+import { useActionState, useState } from "react"; // Tambah useState
+import { useFormStatus } from "react-dom";
+import { loginAction, LoginFormState } from "@/actions/auth";
+import { Lock, Mail, AlertCircle, Eye, EyeOff, Loader2 } from "lucide-react";
 
-// 1. Initial State yang aman
+// 1. Initial State
 const initialState: LoginFormState = {
   success: false,
-  message: '',
-}
+  message: "",
+};
 
 export function LoginForm() {
-  // 2. Gunakan useFormState (Lebih stabil untuk Next.js 14/15)
-  // Action akan otomatis handle redirect jika sukses.
-  // State hanya akan terupdate jika terjadi ERROR (gagal login).
-  const [state, action] = useActionState(loginAction, initialState)
+  const [state, action] = useActionState(loginAction, initialState);
+  const [isVisible, setIsVisible] = useState(false); // State untuk toggle password
 
   return (
-    <form action={action} className="space-y-5">
-      
-      {/* Alert Error - Hanya muncul jika success: false dan ada pesan */}
+    <form action={action} className="space-y-6">
+      {/* Alert Error */}
       {!state?.success && state?.message && (
-        <div className="flex items-center gap-2 p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg animate-in fade-in slide-in-from-top-2">
-          <AlertCircle size={18} />
-          <span>{state.message}</span>
+        <div className="flex items-center gap-3 p-4 text-sm text-red-600 bg-red-50/50 border border-red-200 rounded-xl animate-in fade-in slide-in-from-top-2">
+          <AlertCircle size={18} className="shrink-0" />
+          <span className="font-medium">{state.message}</span>
         </div>
       )}
 
       {/* Input Email */}
-      <div className="space-y-1">
-        <label className="text-sm font-medium text-gray-700" htmlFor="email">Email</label>
-        <div className="relative">
-          <span className="absolute left-3 top-3 text-gray-400"><Mail size={20} /></span>
+      <div className="space-y-2">
+        <label
+          className="text-sm font-semibold text-gray-900 ml-1"
+          htmlFor="email"
+        >
+          Email
+        </label>
+        <div className="relative group">
+          <span className="absolute left-3.5 top-3.5 text-gray-400 group-focus-within:text-violet-600 transition-colors">
+            <Mail size={20} />
+          </span>
           <input
-            id="email" 
-            name="email" 
-            type="email" 
-            required 
+            id="email"
+            name="email"
+            type="email"
+            required
             placeholder="admin@halal.uin.ac.id"
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+            className="w-full pl-11 pr-4 h-12 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 outline-none transition-all placeholder:text-gray-400 text-sm"
           />
         </div>
       </div>
 
-      {/* Input Password */}
-      <div className="space-y-1">
-        <label className="text-sm font-medium text-gray-700" htmlFor="password">Password</label>
-        <div className="relative">
-          <span className="absolute left-3 top-3 text-gray-400"><Lock size={20} /></span>
+      {/* Input Password dengan Toggle */}
+      <div className="space-y-2">
+        <div className="flex justify-between items-center ml-1">
+          <label
+            className="text-sm font-semibold text-gray-900"
+            htmlFor="password"
+          >
+            Password
+          </label>
+        </div>
+
+        <div className="relative group">
+          <span className="absolute left-3.5 top-3.5 text-gray-400 group-focus-within:text-violet-600 transition-colors">
+            <Lock size={20} />
+          </span>
+
           <input
-            id="password" 
-            name="password" 
-            type="password" 
-            required 
+            id="password"
+            name="password"
+            type={isVisible ? "text" : "password"} // Logic type dynamic
+            required
             placeholder="••••••••"
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+            className="w-full pl-11 pr-12 h-12 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 outline-none transition-all placeholder:text-gray-400 text-sm"
           />
+
+          {/* Tombol Mata (Toggle) */}
+          <button
+            type="button" // PENTING: Agar tidak submit form
+            onClick={() => setIsVisible(!isVisible)}
+            className="absolute right-3.5 top-3.5 text-gray-400 hover:text-gray-600 focus:text-violet-600 transition-colors outline-none"
+            aria-label={isVisible ? "Sembunyikan password" : "Lihat password"}
+          >
+            {isVisible ? <EyeOff size={20} /> : <Eye size={20} />}
+          </button>
         </div>
       </div>
 
-      <SubmitButton />
+      <div className="pt-2">
+        <SubmitButton />
+      </div>
     </form>
-  )
+  );
 }
 
 function SubmitButton() {
-  const { pending } = useFormStatus()
-  
+  const { pending } = useFormStatus();
+
   return (
     <button
       type="submit"
       disabled={pending}
-      className={`w-full py-2.5 px-4 text-white font-medium rounded-lg shadow-sm transition-all flex justify-center
-        ${pending ? 'bg-indigo-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'}
-      `}
+      className="w-full h-12 bg-violet-600 hover:bg-violet-700 text-white font-semibold rounded-xl shadow-lg shadow-violet-500/30 hover:shadow-violet-500/50 transition-all disabled:opacity-70 disabled:cursor-not-allowed disabled:shadow-none flex items-center justify-center gap-2"
     >
       {pending ? (
-        <span className="flex items-center gap-2">
-           Loading...
-        </span>
+        <>
+          <Loader2 size={20} className="animate-spin" />
+          <span>Memproses...</span>
+        </>
       ) : (
         "Masuk Dashboard"
       )}
     </button>
-  )
+  );
 }
