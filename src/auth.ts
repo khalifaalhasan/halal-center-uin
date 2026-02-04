@@ -4,22 +4,20 @@ import Credentials from "next-auth/providers/credentials"
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 import { z } from "zod"
-import { authConfig } from "./auth.config" // <--- Import Config Ringan Tadi
+import { authConfig } from "./auth.config"
 
 const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
 })
 
-// Gunakan trik 'as any' jika TypeScript masih rewel soal tipe NextAuth
 const NextAuthBypass = NextAuth as any; 
 
 export const { handlers, signIn, signOut, auth } = NextAuthBypass({
-  ...authConfig, // <--- Load config dasar
+  ...authConfig, // <--- Logic callback JWT & Session otomatis ke-load dari sini
   providers: [
     Credentials({
-      // Logic Database Prisma Tetap Disini (Aman karena hanya jalan di Server Action)
-      authorize: async (credentials) => {
+      authorize: async (credentials, request) => {
         const parsedCredentials = loginSchema.safeParse(credentials)
 
         if (parsedCredentials.success) {
@@ -35,7 +33,7 @@ export const { handlers, signIn, signOut, auth } = NextAuthBypass({
               id: user.id, 
               name: user.name, 
               email: user.email, 
-              role: user.role 
+              role: user.role as any // Dikirim ke callback JWT di auth.config.ts
             }
           }
         }

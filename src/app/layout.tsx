@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import branding from "@/constants/branding.json";
 import NextTopLoader from "nextjs-toploader";
+import NextAuth from "next-auth";
+import { NextAuthProvider } from "@/components/providers/next-auth-providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,7 +44,7 @@ export default function RootLayout({
           shadow="0 0 10px #4f46e5,0 0 5px #4f46e5"
           zIndex={1600}
         />
-        {children}
+        <NextAuthProvider>{children}</NextAuthProvider>
       </body>
     </html>
   );
