@@ -1,36 +1,22 @@
+// src/auth.config.ts
+import type { NextAuthConfig } from "next-auth"
+
 export const authConfig = {
   pages: {
     signIn: "/login",
   },
   session: {
-    strategy: "jwt" as const, // 'as const' biar TS ga rewel soal string literal
+    strategy: "jwt",
     maxAge: 24 * 60 * 60,
   },
+  providers: [], 
   callbacks: {
-    // 1. Fix error 'implicit any' pada Authorized
-    // Kita kasih tipe ': any' biar aman dulu
-    authorized({ auth, request: { nextUrl } }: { auth: any; request: any }) {
-      const isLoggedIn = !!auth?.user;
-      const isOnDashboard = nextUrl.pathname.startsWith("/admin");
-      const isOnLogin = nextUrl.pathname.startsWith("/login");
-
-      if (isOnDashboard) {
-        if (isLoggedIn) return true;
-        return false;
-      }
-
-      if (isOnLogin) {
-        if (isLoggedIn) {
-          return Response.redirect(new URL("/admin", nextUrl));
-        }
-        return true;
-      }
-
-      return true;
+    authorized({ auth, request: { nextUrl } }) {
+      return true; 
     },
-
-    // 2. Fix error 'implicit any' pada JWT
-    async jwt({ token, user }: { token: any; user: any }) {
+    
+    // PENTING: Pindahkan Role dari User -> Token
+    async jwt({ token, user }) {
       if (user) {
         token.role = user.role;
         token.id = user.id;
@@ -38,14 +24,15 @@ export const authConfig = {
       return token;
     },
 
-    // 3. Fix error 'implicit any' pada Session
-    async session({ session, token }: { session: any; token: any }) {
+    // PENTING: Pindahkan Role dari Token -> Session (biar kebaca middleware)
+    async session({ session, token }) {
       if (session.user && token) {
-        session.user.role = token.role;
+        // @ts-ignore
+        session.user.role = token.role; 
+        // @ts-ignore
         session.user.id = token.id;
       }
       return session;
     },
   },
-  providers: [],
-};
+} satisfies NextAuthConfig;
