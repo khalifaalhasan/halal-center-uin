@@ -74,52 +74,6 @@ async function main() {
   }
 
 
-  // --- [4. SEED STRUKTUR ORGANISASI (TEAM MEMBER)] ---
-  console.log("🏢 Seeding Organization Structure...");
-
-  // ROOT: Ketua Halal Center
-  const ketua = await prisma.teamMember.create({
-    data: {
-      name: "Dr. Irham Falahi, M.Si.",
-      role: "Ketua Halal Center",
-      // Kosongkan image atau isi url dummy jika mau
-      image: "https://ui-avatars.com/api/?name=Irham+Falahi&background=random", 
-      order: 1,
-    },
-  });
-
-  // LEVEL 2: Sekretaris (Anak dari Ketua)
-  await prisma.teamMember.create({
-    data: {
-      name: "Ahmad Zarkasih",
-      role: "Sekretaris",
-      parentId: ketua.id, // Relasi ke Ketua
-      image: "https://ui-avatars.com/api/?name=Ahmad+Zarkasih&background=random",
-      order: 1,
-    },
-  });
-
-  // LEVEL 2: Bendahara (Anak dari Ketua)
-  await prisma.teamMember.create({
-    data: {
-      name: "Siti Aminah",
-      role: "Bendahara",
-      parentId: ketua.id, // Relasi ke Ketua
-      image: "https://ui-avatars.com/api/?name=Siti+Aminah&background=random",
-      order: 2,
-    },
-  });
-
-  // LEVEL 2: Koord. Auditor (Anak dari Ketua)
-  await prisma.teamMember.create({
-    data: {
-      name: "Budi Santoso",
-      role: "Koord. Auditor",
-      parentId: ketua.id, // Relasi ke Ketua
-      image: "https://ui-avatars.com/api/?name=Budi+Santoso&background=random",
-      order: 3,
-    },
-  });
 
   console.log("✅ Seeding finished successfully.");
 }

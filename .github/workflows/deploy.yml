@@ -1,0 +1,22 @@
+- name: SSH and Deploy
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.VPS_HOST }}      # 103.84.119.233
+        username: ${{ secrets.VPS_USER }}  # pustipd
+        password: ${{ secrets.VPS_PASSWORD }} # Password user pustipd
+        port: ${{ secrets.VPS_PORT }}      # 1993
+        script: |
+          cd /home/pustipd/halal-center
+          
+          # Gak perlu sudo buat git
+          git fetch --all
+          git checkout main
+          git pull origin main
+          
+          # Gak perlu sudo buat docker (karena sudah dimasukin group)
+          docker compose down
+          docker compose up -d --build --no-cache
+          
+          sleep 10
+          docker exec halal_web npx prisma db push --skip-generate
+          docker image prune -f
